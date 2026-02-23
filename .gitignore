@@ -1,0 +1,10 @@
+pointcloud_txts/
+depth_captures/
+__pycache__/
+*.pth
+.ipynb_checkpoints/
+data/
+*.zip
+*.pth
+*.txt
+__pycache__/
