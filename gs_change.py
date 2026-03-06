@@ -21,30 +21,32 @@ def create_session_folder():
 
 def send_heartbeat():
     """Triggers the robot to start streaming."""
-    cmd = ["ros2", "topic", "pub", "--once", "/api/videohub/request", 
+    cmd = ["ros2", "topic", "pub", "--once", "/api/videohub/request",
            "unitree_api/msg/Request", "{parameter: '{\"api_id\":1001}'}"]
     subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 def record_30s_video(session_path, filename):
     send_heartbeat()
     full_path = os.path.join(session_path, filename)
-    
+
     # Large buffer to prevent 'internal data stream error'
     process = subprocess.Popen(PIPE_CMD.split(), stdout=subprocess.PIPE, bufsize=10**8)
-    
+
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     out = cv2.VideoWriter(full_path, fourcc, 20.0, (640, 480))
-    
+
     print(f"   [REC] {filename} in progress (30s)...")
     start = time.time()
     try:
         while (time.time() - start) < 30:
             raw = process.stdout.read(640 * 480 * 3)
-            if not raw: break
+            if not raw:
+                break
             frame = np.frombuffer(raw, dtype=np.uint8).reshape((480, 640, 3))
             out.write(frame)
             cv2.imshow("Go2 Feed", frame)
-            if cv2.waitKey(1) & 0xFF == ord('q'): break
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
     finally:
         process.terminate()
         out.release()
